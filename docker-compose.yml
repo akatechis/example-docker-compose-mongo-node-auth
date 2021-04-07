@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+
+  events-db:
+    image: mongo
+    volumes:
+      - db-volume:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: $SANDBOX_DB_USER
+      MONGO_INITDB_ROOT_PASSWORD: $SANDBOX_DB_PASS
+      MONGO_INITDB_DATABASE: sandboxdb
+
+  app:
+    image: node:15.12.0
+    user: node
+    working_dir: /home/node/app
+    volumes:
+      - ./:/home/node/app:ro
+    environment:
+      MDB_CONNECTION: mongodb://$SANDBOX_DB_USER:$SANDBOX_DB_PASS@events-db:27017/sandboxdb
+    command: node myapp
+    depends_on:
+      - events-db
+
+volumes:
+  db-volume:
